@@ -1,12 +1,15 @@
-"""PipelineController — orchestrates layers 1-5 sequentially with middleware wrapping.
+"""PipelineController — orchestrates layers 1-6 sequentially with middleware wrapping.
 
-Executes L1 Intake -> L2 Intelligence -> L3 Matcher -> L4 Architect -> L5 Code Forge,
-running middleware before/after each layer and tracking metrics. Handles errors with
-structured error accumulation and aborts if >= 3 layers fail.
+Executes L1 Intake -> L2 Intelligence -> L3 Matcher -> L4 Architect -> L5 Code Forge
+-> L6 Publisher, running middleware before/after each layer and tracking metrics.
+Handles errors with structured error accumulation and aborts if >= 3 layers fail.
+
+L6 (Publisher) is skipped gracefully when no GitHub token is configured.
 """
 
 from __future__ import annotations
 
+import os
 import time
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
@@ -27,6 +30,7 @@ from letsbuild.matcher.engine import MatchEngine
 from letsbuild.models.forge_models import CodeModule, ForgeOutput
 from letsbuild.models.shared import ErrorCategory, StructuredError
 from letsbuild.pipeline.state import PipelineState
+from letsbuild.publisher.engine import PublisherEngine
 
 if TYPE_CHECKING:
     from letsbuild.models.config_models import AppConfig
@@ -39,17 +43,26 @@ _LAYER_NAMES: dict[int, str] = {
     3: "matcher",
     4: "architect",
     5: "forge",
+    6: "publisher",
 }
 
 
 class PipelineController:
-    """Orchestrates the full LetsBuild pipeline from JD to ForgeOutput.
+    """Orchestrates the full LetsBuild pipeline from JD to PublishResult.
 
-    Currently implements layers 1-5. Layers 6-7 (Publisher, Content)
-    are not yet wired and will be added in future iterations.
+    Implements layers 1-6. Layer 7 (Content Factory) will be added in a
+    future iteration.
+
+    Layer 6 (Publisher) is skipped with a warning log when no GitHub token is
+    available. Set the ``GITHUB_TOKEN`` environment variable or pass a
+    ``PublisherEngine`` instance via ``publisher_engine`` to enable publishing.
     """
 
-    def __init__(self, config: AppConfig | None = None) -> None:
+    def __init__(
+        self,
+        config: AppConfig | None = None,
+        publisher_engine: PublisherEngine | None = None,
+    ) -> None:
         self._config = config
         self._log = logger.bind(component="pipeline_controller")
 
@@ -58,6 +71,9 @@ class PipelineController:
         self.intelligence_coordinator = IntelligenceCoordinator()
         self.match_engine = MatchEngine()
         self.project_architect = ProjectArchitect()
+
+        # L6 PublisherEngine — injected directly or auto-built from env vars
+        self.publisher_engine: PublisherEngine | None = publisher_engine
 
         # Middleware chain — empty by default; callers can inject via set_middleware_chain
         self._middleware_chain: MiddlewareChain | None = None
@@ -79,7 +95,9 @@ class PipelineController:
         jd_text: str | None = None,
         jd_url: str | None = None,
     ) -> PipelineState:
-        """Execute layers 1-5 sequentially and return the accumulated state.
+        """Execute layers 1-6 sequentially and return the accumulated state.
+
+        Layer 6 (Publisher) is skipped when no GitHub token is configured.
 
         Args:
             jd_text: Raw job description text.
@@ -99,7 +117,7 @@ class PipelineController:
         self._log.info("pipeline_start", thread_id=state.thread_id)
         pipeline_start = time.monotonic()
 
-        for layer_num in range(1, 6):
+        for layer_num in range(1, 7):
             if state.is_failed():
                 self._log.warning(
                     "pipeline_abort",
@@ -108,6 +126,14 @@ class PipelineController:
                     error_count=len(state.errors),
                 )
                 break
+
+            # L6 requires a configured publisher — skip gracefully if absent
+            if layer_num == 6 and not self._resolve_publisher_engine():
+                self._log.warning(
+                    "l6_publisher_skipped",
+                    reason="no_github_token_configured",
+                )
+                continue
 
             state = await self.run_layer(layer_num, state)
 
@@ -191,6 +217,8 @@ class PipelineController:
             return await self._run_architect(state)
         if layer_num == 5:
             return await self._run_forge(state)
+        if layer_num == 6:
+            return await self._run_publisher(state)
 
         msg = f"Layer {layer_num} is not implemented yet."
         raise NotImplementedError(msg)
@@ -335,3 +363,50 @@ class PipelineController:
 
         state.forge_output = forge_output
         return state
+
+    async def _run_publisher(self, state: PipelineState) -> PipelineState:
+        """L6 — publish the generated code to GitHub via PublisherEngine."""
+        if state.project_spec is None:
+            msg = "Cannot run L6 publisher without L4 project_spec."
+            raise ValueError(msg)
+        if state.forge_output is None:
+            msg = "Cannot run L6 publisher without L5 forge_output."
+            raise ValueError(msg)
+
+        engine = self._resolve_publisher_engine()
+        if engine is None:
+            self._log.warning("l6_publisher_skipped", reason="no_github_token_configured")
+            return state
+
+        publish_result = await engine.publish(
+            project_spec=state.project_spec,
+            forge_output=state.forge_output,
+        )
+        state.publish_result = publish_result
+        return state
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    def _resolve_publisher_engine(self) -> PublisherEngine | None:
+        """Return a PublisherEngine, building one from env vars if needed.
+
+        Priority:
+        1. Explicitly injected ``self.publisher_engine``
+        2. ``GITHUB_TOKEN`` + ``GITHUB_OWNER`` environment variables
+        3. Return ``None`` (caller skips L6 gracefully)
+        """
+        if self.publisher_engine is not None:
+            return self.publisher_engine
+
+        github_token = os.environ.get("GITHUB_TOKEN")
+        github_owner = os.environ.get("GITHUB_OWNER")
+        if github_token and github_owner:
+            self.publisher_engine = PublisherEngine(
+                github_token=github_token,
+                owner=github_owner,
+            )
+            return self.publisher_engine
+
+        return None
