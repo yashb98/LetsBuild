@@ -1,10 +1,14 @@
-"""PipelineController — orchestrates layers 1-6 sequentially with middleware wrapping.
+"""PipelineController — orchestrates layers 1-7 sequentially with middleware wrapping.
 
 Executes L1 Intake -> L2 Intelligence -> L3 Matcher -> L4 Architect -> L5 Code Forge
--> L6 Publisher, running middleware before/after each layer and tracking metrics.
-Handles errors with structured error accumulation and aborts if >= 3 layers fail.
+-> L6 Publisher -> L7 Content Factory, running middleware before/after each layer
+and tracking metrics.  Handles errors with structured error accumulation and aborts
+if >= 3 layers fail.
 
 L6 (Publisher) is skipped gracefully when no GitHub token is configured.
+L7 (Content Factory) always runs if upstream data (project_spec, forge_output) is
+available; publish_result is optional (content is still generated without repo_url
+when L6 was skipped).
 """
 
 from __future__ import annotations
@@ -17,6 +21,7 @@ from typing import TYPE_CHECKING
 import structlog
 
 from letsbuild.architect.engine import ProjectArchitect
+from letsbuild.content.engine import ContentFactory
 from letsbuild.forge.agents.integrator import IntegratorAgent
 from letsbuild.forge.agents.planner import PlannerAgent
 from letsbuild.forge.agents.reviewer import ReviewerAgent
@@ -27,7 +32,15 @@ from letsbuild.harness.middleware import MiddlewareChain  # noqa: TC001
 from letsbuild.intake.engine import IntakeEngine
 from letsbuild.intelligence.coordinator import IntelligenceCoordinator
 from letsbuild.matcher.engine import MatchEngine
+from letsbuild.models.content_models import ContentFormat
 from letsbuild.models.forge_models import CodeModule, ForgeOutput
+from letsbuild.models.publisher_models import (
+    CommitEntry,
+    CommitPhase,
+    CommitPlan,
+    PublishResult,
+    RepoConfig,
+)
 from letsbuild.models.shared import ErrorCategory, StructuredError
 from letsbuild.pipeline.state import PipelineState
 from letsbuild.publisher.engine import PublisherEngine
@@ -44,18 +57,22 @@ _LAYER_NAMES: dict[int, str] = {
     4: "architect",
     5: "forge",
     6: "publisher",
+    7: "content",
 }
 
 
 class PipelineController:
-    """Orchestrates the full LetsBuild pipeline from JD to PublishResult.
+    """Orchestrates the full LetsBuild pipeline from JD to content outputs.
 
-    Implements layers 1-6. Layer 7 (Content Factory) will be added in a
-    future iteration.
+    Implements layers 1-7.
 
     Layer 6 (Publisher) is skipped with a warning log when no GitHub token is
     available. Set the ``GITHUB_TOKEN`` environment variable or pass a
     ``PublisherEngine`` instance via ``publisher_engine`` to enable publishing.
+
+    Layer 7 (Content Factory) always runs when project_spec and forge_output are
+    available. If publish_result is absent (L6 was skipped), a placeholder
+    PublishResult is used so content can still be generated.
     """
 
     def __init__(
@@ -95,9 +112,11 @@ class PipelineController:
         jd_text: str | None = None,
         jd_url: str | None = None,
     ) -> PipelineState:
-        """Execute layers 1-6 sequentially and return the accumulated state.
+        """Execute layers 1-7 sequentially and return the accumulated state.
 
         Layer 6 (Publisher) is skipped when no GitHub token is configured.
+        Layer 7 (Content Factory) always runs when project_spec and forge_output
+        are available; it uses a placeholder PublishResult if L6 was skipped.
 
         Args:
             jd_text: Raw job description text.
@@ -117,7 +136,7 @@ class PipelineController:
         self._log.info("pipeline_start", thread_id=state.thread_id)
         pipeline_start = time.monotonic()
 
-        for layer_num in range(1, 7):
+        for layer_num in range(1, 8):
             if state.is_failed():
                 self._log.warning(
                     "pipeline_abort",
@@ -132,6 +151,16 @@ class PipelineController:
                 self._log.warning(
                     "l6_publisher_skipped",
                     reason="no_github_token_configured",
+                )
+                continue
+
+            # L7 requires at least project_spec and forge_output from upstream layers
+            if layer_num == 7 and (state.project_spec is None or state.forge_output is None):
+                self._log.warning(
+                    "l7_content_skipped",
+                    reason="missing_upstream_data",
+                    has_project_spec=state.project_spec is not None,
+                    has_forge_output=state.forge_output is not None,
                 )
                 continue
 
@@ -219,6 +248,8 @@ class PipelineController:
             return await self._run_forge(state)
         if layer_num == 6:
             return await self._run_publisher(state)
+        if layer_num == 7:
+            return await self._run_content(state)
 
         msg = f"Layer {layer_num} is not implemented yet."
         raise NotImplementedError(msg)
@@ -383,6 +414,64 @@ class PipelineController:
             forge_output=state.forge_output,
         )
         state.publish_result = publish_result
+        return state
+
+    async def _run_content(self, state: PipelineState) -> PipelineState:
+        """L7 — generate multi-format marketing content via ContentFactory.
+
+        Requires project_spec and forge_output from upstream layers.  If
+        publish_result is absent (L6 was skipped), a minimal placeholder
+        PublishResult is constructed so every format generator can run.
+        """
+        if state.project_spec is None:
+            msg = "Cannot run L7 content without L4 project_spec."
+            raise ValueError(msg)
+        if state.forge_output is None:
+            msg = "Cannot run L7 content without L5 forge_output."
+            raise ValueError(msg)
+
+        publish_result = state.publish_result
+        if publish_result is None:
+            # Build a placeholder so content templates have a non-null object.
+            project_name = state.project_spec.project_name
+            placeholder_repo_url = (
+                f"https://github.com/placeholder/{project_name.lower().replace(' ', '-')}"
+            )
+            placeholder_repo_name = project_name.lower().replace(" ", "-")
+            publish_result = PublishResult(
+                repo_url=placeholder_repo_url,
+                commit_shas=[],
+                readme_url=f"{placeholder_repo_url}/blob/main/README.md",
+                repo_config=RepoConfig(
+                    repo_name=placeholder_repo_name,
+                    description=state.project_spec.one_liner,
+                    topics=[t.lower() for t in state.project_spec.tech_stack[:5]],
+                ),
+                commit_plan=CommitPlan(
+                    commits=[
+                        CommitEntry(
+                            message="feat: initial scaffold",
+                            files=[],
+                            phase=CommitPhase.SCAFFOLDING,
+                            timestamp_offset_hours=0.0,
+                        )
+                    ],
+                    total_commits=1,
+                    spread_days=1,
+                ),
+            )
+            self._log.info(
+                "l7_content_using_placeholder_publish_result",
+                placeholder_url=placeholder_repo_url,
+            )
+
+        factory = ContentFactory(formats=list(ContentFormat))
+        content_outputs = await factory.generate(
+            project_spec=state.project_spec,
+            forge_output=state.forge_output,
+            publish_result=publish_result,
+        )
+        state.content_outputs = content_outputs
         return state
 
     # ------------------------------------------------------------------
