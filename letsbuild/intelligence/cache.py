@@ -53,8 +53,8 @@ class CompanyCache:
             return None, CacheStatus.MISS
 
         try:
-            raw = json.loads(path.read_text(encoding="utf-8"))
-            profile = _profile_adapter.validate_python(raw)
+            raw_text = path.read_text(encoding="utf-8")
+            profile = _profile_adapter.validate_json(raw_text)
         except Exception as exc:
             self._log.warning("cache_corrupt", company=company_name, error=str(exc))
             return None, CacheStatus.MISS
