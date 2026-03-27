@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from letsbuild.models.shared import StructuredError
+from letsbuild.models.shared import StructuredError  # noqa: TC001
 
 
 class DataSource(BaseModel):
@@ -28,7 +28,7 @@ class DataSource(BaseModel):
         ),
     )
     retrieved_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         description="When the data was retrieved (UTC).",
     )
     reliability_score: float = Field(
@@ -38,7 +38,7 @@ class DataSource(BaseModel):
     )
 
 
-class SubAgentType(str, Enum):
+class SubAgentType(StrEnum):
     """Enum of the six parallel sub-agents in Company Intelligence."""
 
     WEB_PRESENCE = "web_presence"
@@ -169,7 +169,7 @@ class CompanyProfile(BaseModel):
         description="Raw results from each of the six research sub-agents.",
     )
     researched_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         description="When this profile was researched (UTC).",
     )
     cache_expires_at: datetime | None = Field(

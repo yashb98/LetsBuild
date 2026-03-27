@@ -7,13 +7,13 @@ RoleCategory, SeniorityLevel, Skill, TechStack, and JDAnalysis.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
-class RoleCategory(str, Enum):
+class RoleCategory(StrEnum):
     """Category of role extracted from a job description."""
 
     FULL_STACK = "full_stack_engineer"
@@ -34,7 +34,7 @@ class RoleCategory(str, Enum):
     OTHER = "other"
 
 
-class SeniorityLevel(str, Enum):
+class SeniorityLevel(StrEnum):
     """Seniority level extracted from a job description."""
 
     JUNIOR = "junior"
@@ -203,7 +203,7 @@ class JDAnalysis(BaseModel):
         description="URL where the job description was sourced from.",
     )
     parsed_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         description="Timestamp when the JD was parsed (UTC).",
     )
 

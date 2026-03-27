@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
-class GapCategory(str, Enum):
+class GapCategory(StrEnum):
     """Category of a skill gap relative to a job description."""
 
     STRONG_MATCH = "strong_match"
@@ -18,7 +18,7 @@ class GapCategory(str, Enum):
     PORTFOLIO_REDUNDANCY = "portfolio_redundancy"
 
 
-class MatchDimension(str, Enum):
+class MatchDimension(StrEnum):
     """Dimensions used for weighted match scoring."""
 
     HARD_SKILLS = "hard_skills"
@@ -147,6 +147,6 @@ class GapAnalysis(BaseModel):
         description="Human-readable summary of the gap analysis findings.",
     )
     analysed_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         description="Timestamp of when this analysis was performed (UTC).",
     )

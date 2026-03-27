@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from letsbuild.models.shared import StructuredError
+from letsbuild.models.shared import StructuredError  # noqa: TC001
 
 
-class SwarmTopology(str, Enum):
+class SwarmTopology(StrEnum):
     """Topology pattern used by the Code Forge agent swarm."""
 
     HIERARCHICAL = "hierarchical"
@@ -20,7 +20,7 @@ class SwarmTopology(str, Enum):
     RING = "ring"
 
 
-class AgentRole(str, Enum):
+class AgentRole(StrEnum):
     """Role of an agent within the Code Forge swarm."""
 
     PLANNER = "planner"
@@ -30,7 +30,7 @@ class AgentRole(str, Enum):
     INTEGRATOR = "integrator"
 
 
-class TaskStatus(str, Enum):
+class TaskStatus(StrEnum):
     """Current status of a task in the task graph."""
 
     PENDING = "pending"
@@ -129,7 +129,7 @@ class CodeModule(BaseModel):
     )
 
 
-class ReviewVerdict(str, Enum):
+class ReviewVerdict(StrEnum):
     """Verdict from the independent Reviewer agent."""
 
     PASS = "pass"
@@ -206,7 +206,7 @@ class ForgeOutput(BaseModel):
         description="Individual outputs from each agent execution.",
     )
     completed_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         description="When the forge run completed (UTC).",
     )
 

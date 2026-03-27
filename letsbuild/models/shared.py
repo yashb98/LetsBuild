@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class ErrorCategory(str, Enum):
+class ErrorCategory(StrEnum):
     """Category of error for structured error handling."""
 
     TRANSIENT = "transient"
@@ -30,12 +30,8 @@ class StructuredError(BaseModel):
     error_category: ErrorCategory = Field(
         description="Category of the error for routing retry logic."
     )
-    is_retryable: bool = Field(
-        description="Whether this error can be retried."
-    )
-    message: str = Field(
-        description="Human-readable error message."
-    )
+    is_retryable: bool = Field(description="Whether this error can be retried.")
+    message: str = Field(description="Human-readable error message.")
     partial_results: dict[str, object] | None = Field(
         default=None,
         description="Any partial results obtained before failure.",
@@ -45,7 +41,7 @@ class StructuredError(BaseModel):
         description="The query or operation that was attempted.",
     )
     timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         description="When the error occurred (UTC).",
     )
 
@@ -55,20 +51,14 @@ class GateResult(BaseModel):
 
     model_config = ConfigDict(strict=True)
 
-    passed: bool = Field(
-        description="Whether the gate check passed."
-    )
-    reason: str = Field(
-        description="Explanation of why the gate passed or failed."
-    )
-    blocking: bool = Field(
-        description="Whether failure should halt the pipeline."
-    )
+    passed: bool = Field(description="Whether the gate check passed.")
+    reason: str = Field(description="Explanation of why the gate passed or failed.")
+    blocking: bool = Field(description="Whether failure should halt the pipeline.")
     gate_name: str = Field(
         description="Name of the gate that produced this result.",
     )
     timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         description="When the gate was evaluated (UTC).",
     )
 
