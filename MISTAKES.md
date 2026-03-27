@@ -25,3 +25,15 @@
 - **What:** `for key in list(...)` where key is unused triggers B007
 - **Fix:** Rename to `_key` to indicate intentionally unused
 - **Lesson:** Prefix unused loop variables with `_`.
+
+## 2026-03-27 — Steps 26-45 (Intake + Intelligence + Matcher Phase)
+
+### Mistake 5: Pydantic strict mode + json.loads datetime coercion
+- **What:** `CompanyCache` used `validate_python(json.loads(raw))` but `json.loads` deserialises datetime fields as strings. With `ConfigDict(strict=True)`, Pydantic rejects string→datetime coercion.
+- **Fix:** Changed to `validate_json(raw_text)` which handles string→datetime correctly.
+- **Lesson:** For strict-mode Pydantic models loaded from JSON, use `validate_json()` not `validate_python(json.loads(...))`.
+
+### Mistake 6: Subagent missing file output
+- **What:** Skill extractor agent created taxonomy.json but not skill_extractor.py
+- **Fix:** Launched a second agent to create the missing file
+- **Lesson:** When giving agents multiple files to create, verify all outputs exist before proceeding. Always glob/check after agent completion.
