@@ -1,7 +1,7 @@
-"""PipelineController — orchestrates layers 1-4 sequentially with middleware wrapping.
+"""PipelineController — orchestrates layers 1-5 sequentially with middleware wrapping.
 
-Executes L1 Intake -> L2 Intelligence -> L3 Matcher -> L4 Architect, running
-middleware before/after each layer and tracking metrics. Handles errors with
+Executes L1 Intake -> L2 Intelligence -> L3 Matcher -> L4 Architect -> L5 Code Forge,
+running middleware before/after each layer and tracking metrics. Handles errors with
 structured error accumulation and aborts if >= 3 layers fail.
 """
 
@@ -14,10 +14,17 @@ from typing import TYPE_CHECKING
 import structlog
 
 from letsbuild.architect.engine import ProjectArchitect
+from letsbuild.forge.agents.integrator import IntegratorAgent
+from letsbuild.forge.agents.planner import PlannerAgent
+from letsbuild.forge.agents.reviewer import ReviewerAgent
+from letsbuild.forge.agents.tester import TesterAgent
+from letsbuild.forge.executor import ForgeExecutor
+from letsbuild.forge.topology import TopologySelector
 from letsbuild.harness.middleware import MiddlewareChain  # noqa: TC001
 from letsbuild.intake.engine import IntakeEngine
 from letsbuild.intelligence.coordinator import IntelligenceCoordinator
 from letsbuild.matcher.engine import MatchEngine
+from letsbuild.models.forge_models import CodeModule, ForgeOutput
 from letsbuild.models.shared import ErrorCategory, StructuredError
 from letsbuild.pipeline.state import PipelineState
 
@@ -31,13 +38,14 @@ _LAYER_NAMES: dict[int, str] = {
     2: "intelligence",
     3: "matcher",
     4: "architect",
+    5: "forge",
 }
 
 
 class PipelineController:
-    """Orchestrates the full LetsBuild pipeline from JD to ProjectSpec.
+    """Orchestrates the full LetsBuild pipeline from JD to ForgeOutput.
 
-    Currently implements layers 1-4. Layers 5-7 (Forge, Publisher, Content)
+    Currently implements layers 1-5. Layers 6-7 (Publisher, Content)
     are not yet wired and will be added in future iterations.
     """
 
@@ -71,7 +79,7 @@ class PipelineController:
         jd_text: str | None = None,
         jd_url: str | None = None,
     ) -> PipelineState:
-        """Execute layers 1-4 sequentially and return the accumulated state.
+        """Execute layers 1-5 sequentially and return the accumulated state.
 
         Args:
             jd_text: Raw job description text.
@@ -91,7 +99,7 @@ class PipelineController:
         self._log.info("pipeline_start", thread_id=state.thread_id)
         pipeline_start = time.monotonic()
 
-        for layer_num in range(1, 5):
+        for layer_num in range(1, 6):
             if state.is_failed():
                 self._log.warning(
                     "pipeline_abort",
@@ -119,7 +127,7 @@ class PipelineController:
         """Execute a single layer, wrapped by middleware if configured.
 
         Args:
-            layer_num: Layer number (1-4 currently supported).
+            layer_num: Layer number (1-5 currently supported).
             state: The current pipeline state.
 
         Returns:
@@ -181,6 +189,8 @@ class PipelineController:
             return await self._run_matcher(state)
         if layer_num == 4:
             return await self._run_architect(state)
+        if layer_num == 5:
+            return await self._run_forge(state)
 
         msg = f"Layer {layer_num} is not implemented yet."
         raise NotImplementedError(msg)
@@ -248,4 +258,80 @@ class PipelineController:
             skill_config=skill_config,
         )
         state.project_spec = spec
+        return state
+
+    async def _run_forge(self, state: PipelineState) -> PipelineState:
+        """L5 — generate code via the Code Forge multi-agent pipeline.
+
+        Steps:
+        1. Plan tasks from ``state.project_spec`` via PlannerAgent.
+        2. Select topology via TopologySelector.
+        3. Execute tasks via ForgeExecutor (heuristic fallback if no LLM).
+        4. Test code via TesterAgent.
+        5. Review code via ReviewerAgent (independent — no coder context).
+        6. Integrate code via IntegratorAgent.
+        7. Assemble and return ForgeOutput.
+        """
+        if state.project_spec is None:
+            msg = "Cannot run L5 forge without L4 project_spec."
+            raise ValueError(msg)
+
+        project_spec = state.project_spec
+
+        # 1. Plan
+        planner = PlannerAgent(llm_client=None)
+        task_graph = await planner.plan(project_spec)
+
+        # 2. Topology selection
+        topology_selector = TopologySelector()
+        topology = topology_selector.select(project_spec)
+        task_graph.topology = topology
+
+        # 3. Execute (code generation)
+        executor = ForgeExecutor(llm_client=None)
+        agent_outputs = await executor.execute_tasks(
+            task_graph,
+            project_context=f"Project: {project_spec.project_name} — {project_spec.one_liner}",
+        )
+
+        # Collect code modules from all agent outputs
+        code_modules: list[CodeModule] = []
+        for output in agent_outputs:
+            code_modules.extend(output.output_modules)
+
+        # 4. Test
+        tester = TesterAgent(llm_client=None)
+        test_output = await tester.test(code_modules, test_plan="Run all sandbox validation tests")
+
+        # 5. Review (independent — no coder context)
+        reviewer = ReviewerAgent(llm_client=None)
+        review_result = await reviewer.review(
+            code_modules=code_modules,
+            project_spec_summary=f"{project_spec.project_name}: {project_spec.one_liner}",
+        )
+
+        # 6. Integrate
+        integrator = IntegratorAgent(llm_client=None)
+        await integrator.integrate(
+            code_modules=code_modules,
+            integration_plan="Assemble all modules and verify integration.",
+        )
+
+        # 7. Build ForgeOutput
+        total_tokens = sum(o.tokens_used for o in agent_outputs)
+        total_retries = sum(o.retry_count for o in agent_outputs)
+
+        forge_output = ForgeOutput(
+            code_modules=code_modules,
+            test_results={"all_tests": test_output.success},
+            review_verdict=review_result.verdict,
+            review_comments=review_result.comments,
+            quality_score=review_result.score,
+            total_tokens_used=total_tokens,
+            total_retries=total_retries,
+            topology_used=task_graph.topology,
+            agent_outputs=agent_outputs,
+        )
+
+        state.forge_output = forge_output
         return state
