@@ -1,0 +1,33 @@
+Junior Data Scientist
+DataBridge Analytics — Manchester, UK (Remote)
+
+About DataBridge
+DataBridge Analytics helps mid-market retailers turn raw sales data into actionable insights. Our platform ingests point-of-sale feeds and produces demand forecasts, inventory recommendations, and customer segmentation reports.
+
+The Role
+We are hiring a Junior Data Scientist to join our growing Analytics team. You will work alongside senior data scientists to build and validate predictive models, clean messy datasets, and present findings to non-technical stakeholders.
+
+Responsibilities
+- Explore and clean large datasets using Python and pandas
+- Build and evaluate machine learning models with scikit-learn
+- Create visualisations and dashboards in Jupyter notebooks
+- Write SQL queries to extract and transform data from our warehouse
+- Document methodology and results for internal knowledge base
+- Participate in weekly model review sessions
+
+Requirements
+- Bachelor's degree in a quantitative field (Statistics, Mathematics, Computer Science, or similar)
+- 0-1 years of professional or internship experience in data science
+- Proficiency in Python with pandas, NumPy, and scikit-learn
+- Comfortable writing SQL queries for data extraction
+- Experience with Jupyter notebooks for exploratory analysis
+- Basic understanding of statistical concepts (regression, classification, hypothesis testing)
+
+Nice to Have
+- Familiarity with cloud data warehouses (BigQuery, Redshift)
+- Experience with data visualisation tools (Matplotlib, Seaborn, Plotly)
+- Knowledge of version control with Git
+- Exposure to deep learning frameworks (TensorFlow, PyTorch)
+
+Salary: GBP 30,000 - 38,000
+Remote Policy: Fully remote

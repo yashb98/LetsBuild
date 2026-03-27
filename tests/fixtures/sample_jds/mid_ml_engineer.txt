@@ -1,0 +1,33 @@
+Mid-Level Machine Learning Engineer
+Cortex Health — Birmingham, UK (Hybrid)
+
+About Cortex Health
+Cortex Health is a healthtech company using AI to improve clinical decision support. Our models analyse patient records and imaging data to assist radiologists and oncologists with early detection.
+
+The Role
+We are looking for a Mid-Level ML Engineer to develop, deploy, and monitor machine learning models in production. You will bridge the gap between research prototypes and reliable, scalable inference services.
+
+Responsibilities
+- Train, evaluate, and deploy machine learning models using PyTorch
+- Build and maintain ML pipelines with MLflow for experiment tracking and model registry
+- Containerise models with Docker and deploy to FastAPI-based serving endpoints
+- Implement data validation and monitoring for model drift detection
+- Collaborate with data engineers to ensure clean, versioned training datasets
+- Write comprehensive tests for model training and inference code
+
+Requirements
+- 2-4 years of experience in machine learning engineering or applied ML
+- Strong Python skills with hands-on PyTorch experience
+- Experience with MLflow or similar experiment tracking tools
+- Proficiency with Docker for containerisation and local development
+- Familiarity with FastAPI or Flask for building model serving APIs
+- Understanding of ML fundamentals (gradient descent, cross-validation, overfitting)
+
+Nice to Have
+- Experience with healthcare or medical imaging data
+- Knowledge of Kubernetes for orchestrating model deployments
+- Familiarity with ONNX or TensorRT for model optimisation
+- Experience with data versioning tools (DVC, LakeFS)
+
+Salary: GBP 55,000 - 70,000
+Remote Policy: Hybrid (2 days in office)

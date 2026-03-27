@@ -1,0 +1,33 @@
+Senior Full-Stack Engineer
+Acme Financial Technologies — London, UK (Hybrid)
+
+About Us
+Acme Financial Technologies is a fast-growing fintech startup building the next generation of payment infrastructure for European businesses. We process over 2 billion transactions per year and are expanding into real-time settlement.
+
+The Role
+We are looking for a Senior Full-Stack Engineer to join our Platform team. You will own end-to-end feature delivery across our React front-end and Node.js microservices, working closely with product and design to ship delightful experiences for our merchant dashboard.
+
+Responsibilities
+- Design and implement new features across the full stack (React, Node.js, PostgreSQL)
+- Build and maintain RESTful APIs and GraphQL endpoints
+- Collaborate with DevOps to improve CI/CD pipelines and AWS infrastructure
+- Mentor junior engineers through code reviews and pair programming
+- Contribute to architectural decisions and technical roadmaps
+- Monitor production systems and respond to incidents
+
+Requirements
+- 3+ years of professional experience in full-stack web development
+- Strong proficiency in TypeScript, React, and Node.js
+- Experience with PostgreSQL or similar relational databases
+- Familiarity with AWS services (EC2, S3, Lambda, RDS)
+- Solid understanding of RESTful API design and microservice architecture
+- Experience with Git, CI/CD, and agile development practices
+
+Nice to Have
+- Experience in fintech or payments domain
+- Knowledge of GraphQL and Apollo
+- Familiarity with Docker and Kubernetes
+- Contributions to open-source projects
+
+Salary: GBP 75,000 - 95,000 + equity
+Remote Policy: Hybrid (3 days in office)

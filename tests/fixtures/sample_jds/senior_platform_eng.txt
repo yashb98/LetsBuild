@@ -1,0 +1,34 @@
+Senior Platform Engineer
+NovaPay — Edinburgh, UK (Remote)
+
+About NovaPay
+NovaPay is a Series B payments company providing embedded finance APIs to SaaS platforms across Europe. Our infrastructure handles millions of API calls daily with sub-100ms latency requirements.
+
+The Role
+We need a Senior Platform Engineer to build and maintain the foundational infrastructure that our engineering teams rely on. You will design scalable, secure, and cost-effective cloud infrastructure using Infrastructure as Code principles.
+
+Responsibilities
+- Design and manage AWS infrastructure using Terraform modules
+- Build and maintain Kubernetes clusters for microservice deployments
+- Develop and improve CI/CD pipelines with GitHub Actions and ArgoCD
+- Implement observability solutions (metrics, logs, traces) across all services
+- Write internal tooling and CLI utilities in Go
+- Lead incident response and conduct post-mortems
+- Define and enforce platform standards and best practices
+
+Requirements
+- 5+ years of experience in platform engineering, SRE, or DevOps
+- Expert-level knowledge of Kubernetes (EKS preferred) and Helm
+- Strong Terraform skills with experience managing multi-account AWS environments
+- Proficiency in Go for building internal tools and operators
+- Deep understanding of CI/CD best practices and GitOps workflows
+- Experience with monitoring stacks (Prometheus, Grafana, Datadog)
+
+Nice to Have
+- AWS certifications (Solutions Architect, DevOps Engineer)
+- Experience with service mesh technologies (Istio, Linkerd)
+- Knowledge of FinOps and cloud cost optimisation
+- Familiarity with policy-as-code tools (OPA, Kyverno)
+
+Salary: GBP 85,000 - 110,000 + equity
+Remote Policy: Fully remote (UK-based)

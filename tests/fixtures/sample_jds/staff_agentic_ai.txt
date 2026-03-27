@@ -1,0 +1,35 @@
+Staff Agentic AI Engineer
+Meridian Labs — London, UK (Hybrid)
+
+About Meridian Labs
+Meridian Labs is an AI-native company building autonomous agent systems for enterprise workflow automation. Our platform orchestrates multi-step tasks across CRM, ERP, and communication tools using large language models.
+
+The Role
+We are hiring a Staff Agentic AI Engineer to architect and build our next-generation agent framework. You will design multi-agent systems that reason, plan, and execute complex business processes with minimal human intervention.
+
+Responsibilities
+- Architect multi-agent orchestration systems with tool use and structured output
+- Design and implement agentic loops using the Claude API and Anthropic SDK
+- Build retrieval-augmented generation pipelines with vector databases (Pinecone, Weaviate)
+- Develop evaluation frameworks for agent reliability, safety, and cost efficiency
+- Mentor the team on prompt engineering, context management, and LLM best practices
+- Define technical standards for agent development across the organisation
+- Collaborate with product to translate business workflows into agent architectures
+
+Requirements
+- 5+ years of software engineering experience, with 2+ years focused on LLM applications
+- Deep expertise in Python with strong async programming skills (asyncio, httpx)
+- Hands-on experience building agentic systems with LangChain, CrewAI, or custom frameworks
+- Familiarity with the Claude API, including tool_use and structured output patterns
+- Experience with vector databases for semantic search and long-term memory
+- Strong understanding of prompt engineering, context windows, and token economics
+
+Nice to Have
+- Experience with multi-model routing and cost optimisation
+- Knowledge of reinforcement learning from human feedback (RLHF)
+- Contributions to open-source AI/ML projects
+- Published research or blog posts on agentic AI systems
+- Familiarity with evaluation frameworks (LMSYS, HELM, custom benchmarks)
+
+Salary: GBP 120,000 - 150,000 + equity
+Remote Policy: Hybrid (2 days in office)
