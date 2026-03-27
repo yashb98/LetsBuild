@@ -1,0 +1,209 @@
+{# Blog Post Template — 2000-3000 word technical Markdown blog post.
+   Variables: project_name, one_liner, repo_url, features (list with feature_name,
+   description, module_path, estimated_complexity, acceptance_criteria list),
+   tech_stack (list), adr_list (list with title, status, context, decision, consequences),
+   quality_score (float), review_verdict (string), seniority_target (string),
+   estimated_loc (int), file_tree (list of nodes with path and description),
+   test_results (dict), review_comments (list of strings). #}
+# Building {{ project_name }}: A {{ seniority_target | title }}-Level Portfolio Project with {{ tech_stack[0] if tech_stack else 'Modern Tech' }}
+
+> **TL;DR** — {{ one_liner }}  Source code: [{{ repo_url }}]({{ repo_url }})
+
+---
+
+## Introduction
+
+Portfolio projects live or die by one question: does this look like something a
+professional actually built, or does it look like a tutorial clone?
+
+**{{ project_name }}** is my answer to that question.  It is a {{ seniority_target }}-level
+project built with {{ tech_stack | join(', ') }}.  Every line of code was validated in a
+Docker sandbox before publishing, and every major architectural decision is captured in an
+Architecture Decision Record.
+
+In this post I will walk you through:
+
+1. The motivation and problem statement
+2. The architecture and key design decisions
+3. Each major feature with code highlights
+4. How I approached testing and quality
+5. The deployment pipeline
+6. Lessons learned and what I would do differently
+
+---
+
+## Motivation
+
+{{ one_liner }}
+
+Most existing solutions in this space either lack proper documentation or skip production
+concerns like observability, error handling, and architectural transparency.  I wanted to
+build something I would be comfortable deploying in a real engineering organisation —
+complete with tests, CI/CD, and written architecture decisions.
+
+**Tech stack:** {{ tech_stack | join(', ') }}
+
+**Estimated scope:** ~{{ "{:,}".format(estimated_loc) }} lines of code across
+{{ file_tree | length }} top-level modules.
+
+---
+
+## Architecture
+
+The project is structured around clear separation of concerns.  Here is the
+high-level architecture:
+
+```
+{{ project_name }}/
+{% for node in file_tree[:8] %}
+├── {{ node.path }}  {{ ('# ' + node.description) if node.description else '' }}
+{% endfor %}
+```
+
+**Key architectural principles:**
+
+- **Single responsibility** — each module has one job
+- **Dependency injection** — configuration and clients are injected, not hardcoded
+- **Fail loudly** — errors surface early with structured context
+
+{% if adr_list %}
+### Architecture Decision Records
+
+{% for adr in adr_list[:3] %}
+#### ADR: {{ adr.title }}
+
+**Status:** {{ adr.status.value | title if adr.status and adr.status.value else adr.status | title }}
+
+**Context:** {{ adr.context }}
+
+**Decision:** {{ adr.decision }}
+
+**Consequences:** {{ adr.consequences }}
+
+{% endfor %}
+{% endif %}
+
+---
+
+## Features
+
+{{ project_name }} ships with {{ features | length }} core features:
+
+{% for feature in features %}
+### {{ feature.feature_name }}
+
+{{ feature.description }}
+
+**Module:** `{{ feature.module_path }}`
+**Complexity:** {{ feature.estimated_complexity }}/10
+
+{% if feature.acceptance_criteria %}
+**Acceptance criteria:**
+{% for criterion in feature.acceptance_criteria[:3] %}
+- {{ criterion }}
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+
+---
+
+## Code Highlights
+
+Below is a representative snippet illustrating the design philosophy of the project.
+The full source code is at [{{ repo_url }}]({{ repo_url }}).
+
+```python
+# {{ features[0].feature_name if features else project_name }}
+# See {{ features[0].module_path if features else 'src/' }} for the complete implementation
+```
+
+The pattern here — strict typing, explicit error handling, and minimal surface area — is
+consistent throughout the entire codebase.  Every public function has a docstring.  Every
+module has a `__all__` export list.
+
+---
+
+## Testing & Quality
+
+{% set passed_count = test_results.values() | selectattr('__eq__', 'equalto', True) | list | length if test_results else 0 %}
+{% set total_count = test_results | length if test_results else 0 %}
+
+The independent code review returned a verdict of
+**{{ review_verdict | replace('_', ' ') | title }}**
+with a quality score of **{{ "%.0f" | format(quality_score) }}/100**.
+
+{% if total_count > 0 %}
+The project has {{ passed_count }}/{{ total_count }} tests passing.
+{% else %}
+The full test suite is included in the repository.
+{% endif %}
+
+I followed a test-first approach for the core business logic, and I used the sandbox
+validation plan to ensure the full stack runs end-to-end before any commit lands.
+
+```bash
+# Run the test suite
+pytest tests/ -v --cov={{ project_name | lower | replace(' ', '_') | replace('-', '_') }} --cov-report=term-missing
+```
+
+{% if review_comments %}
+**Review comments (selected):**
+{% for comment in review_comments[:3] %}
+- {{ comment }}
+{% endfor %}
+{% endif %}
+
+---
+
+## Deployment
+
+The repository includes a full CI/CD pipeline with GitHub Actions.  On every push:
+
+1. Lint and type-check with `ruff` and `mypy`
+2. Run the test suite with coverage reporting
+3. Build and validate the Docker image
+4. (On `main`) Deploy to the target environment
+
+See `.github/workflows/` in the repository for the full pipeline definition.
+
+The project ships with a `.env.example` file — copy it to `.env` and fill in your values
+before running locally.
+
+---
+
+## Lessons Learned
+
+Building this project reinforced a few principles I now consider non-negotiable
+for portfolio-quality work:
+
+1. **Document decisions as you make them** — the ADRs took 30 minutes to write
+   and already saved me from second-guessing past choices.
+2. **Run your code in a real environment from day one** — the sandbox caught
+   environment-specific bugs that my local machine masked.
+3. **Independent code review forces clarity** — having a second pass with fresh
+   eyes (even an automated one) caught ambiguous variable names and missing edge cases.
+4. **Typed code is self-documenting** — strict type checking with `mypy --strict`
+   eliminated an entire category of runtime errors before they could reach review.
+
+---
+
+## What's Next
+
+- Performance benchmarking under realistic load
+- Additional integration test scenarios covering edge cases
+- Expanded documentation and step-by-step tutorials
+- Community contributions welcome — see `CONTRIBUTING.md`
+
+---
+
+## Source Code
+
+The full source code is available at [{{ repo_url }}]({{ repo_url }}).
+
+If you found this useful, please star the repo and share it with someone who is
+also building their portfolio.  Questions and PRs are very welcome!
+
+---
+
+*Built with {{ tech_stack | join(', ') }}.*

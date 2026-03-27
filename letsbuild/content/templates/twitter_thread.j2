@@ -1,0 +1,79 @@
+{# Twitter/X Thread Template — 10-15 tweet thread for a portfolio project showcase.
+   Variables: project_name, one_liner, repo_url, features (list with feature_name,
+   description, module_path, estimated_complexity), tech_stack (list of strings),
+   quality_score (float), review_verdict (string), seniority_target (string),
+   estimated_loc (int), file_tree (list of nodes with path),
+   test_results (dict bool values). #}
+{% set feature_count = features[:5] | length %}
+{% set has_tests = test_results | length > 0 %}
+{% set passed_count = test_results.values() | selectattr('__eq__', 'equalto', True) | list | length if test_results else 0 %}
+{% set total_count = test_results | length if test_results else 0 %}
+{% set tweet_count = feature_count + 6 %}
+[1/{{ tweet_count }}] I spent the last few weeks building {{ project_name }}.
+
+{{ one_liner }}
+
+Here's what I built, how I built it, and what I learned 🧵
+
+---
+
+[2/{{ tweet_count }}] The problem:
+
+Most portfolio projects are:
+❌ Tutorial clones with no original thought
+❌ Missing a real test suite
+❌ No architecture documentation
+
+I wanted to build something that looks like real engineering.
+
+---
+
+[3/{{ tweet_count }}] The solution: {{ project_name }}
+
+Tech stack: {{ tech_stack[:4] | join(', ') }}
+
+~{{ "{:,}".format(estimated_loc) }} lines of code
+Seniority target: {{ seniority_target }}
+
+---
+
+[4/{{ tweet_count }}] The architecture:
+
+Core modules: {{ file_tree[:4] | map(attribute='path') | join(', ') }}
+
+Every major decision is documented in an Architecture Decision Record (ADR).
+
+This is how senior engineers work.
+
+---
+{% for feature in features[:5] %}
+[{{ loop.index + 4 }}/{{ tweet_count }}] Feature: {{ feature.feature_name }}
+
+{{ feature.description }}
+
+Module: `{{ feature.module_path }}`
+Complexity: {{ feature.estimated_complexity }}/10
+
+---
+{% endfor %}
+
+[{{ feature_count + 5 }}/{{ tweet_count }}] Testing:
+
+{% if has_tests %}
+{{ passed_count }}/{{ total_count }} tests passing
+{% else %}
+Full test suite included in the repo.
+{% endif %}
+
+Quality score: {{ "%.0f" | format(quality_score) }}/100
+Review verdict: {{ review_verdict | replace('_', ' ') | title }}
+
+---
+
+[{{ tweet_count }}/{{ tweet_count }}] The full source code is open source.
+
+⭐ Star it: {{ repo_url }}
+
+If this was useful, RT the first tweet so other devs can see it.
+
+What should I build next? Reply below 👇

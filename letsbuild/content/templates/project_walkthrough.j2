@@ -1,0 +1,198 @@
+{# Project Walkthrough Template — Step-by-step tutorial for setting up and exploring a
+   generated portfolio project. Variables: project_name, one_liner, repo_url,
+   features (list with feature_name, description, module_path, acceptance_criteria list),
+   tech_stack (list), adr_list (list with title and status), quality_score (float),
+   review_verdict (string), seniority_target (string), estimated_loc (int),
+   file_tree (list of nodes with path and description), repo_name (string),
+   sandbox_commands (list with command and description strings),
+   review_comments (list of strings), primary_lang (string: 'python' or 'typescript'). #}
+# {{ project_name }}: Complete Project Walkthrough
+
+> {{ one_liner }}
+
+**Repository:** [{{ repo_url }}]({{ repo_url }})
+**Tech stack:** {{ tech_stack | join(', ') }}
+**Seniority target:** {{ seniority_target | title }}
+**Estimated LOC:** ~{{ "{:,}".format(estimated_loc) }}
+
+---
+
+## Overview
+
+{{ one_liner }}
+
+This walkthrough covers setup, architecture, each feature, testing, and deployment.
+By the end you will have the project running locally and a clear picture of every
+major design decision.
+
+---
+
+## Prerequisites
+
+Before you begin, make sure you have the following installed:
+
+{% if primary_lang == 'typescript' %}
+- **Node.js** 20+ — [nodejs.org](https://nodejs.org)
+- **npm** 10+ (ships with Node.js)
+{% else %}
+- **Python** 3.12+ — [python.org](https://python.org)
+- **pip** 24+
+{% endif %}
+- **Git** 2.40+
+- **Docker** 24+ (optional, for sandbox validation)
+
+---
+
+## Step 1: Clone & Install
+
+```bash
+# Clone the repository
+git clone {{ repo_url }}
+cd {{ repo_name }}
+
+# Install dependencies
+{% if primary_lang == 'typescript' %}
+npm install
+{% else %}
+pip install -e ".[dev]"
+{% endif %}
+
+# Copy environment variables
+cp .env.example .env
+# Edit .env and fill in your values
+```
+
+---
+
+## Step 2: Architecture Overview
+
+The project is organised into {{ file_tree | length }} top-level modules:
+
+```
+{{ project_name }}/
+{% for node in file_tree %}
+├── {{ node.path }}  {{ ('# ' + node.description) if node.description else '' }}
+{% endfor %}
+```
+
+**Design principles:**
+
+- **Single responsibility** — each module has one well-defined job
+- **Dependency injection** — all external clients are injected, not hardcoded
+- **Typed throughout** — strict type checking enabled from day one
+
+{% if adr_list %}
+### Architecture Decision Records
+
+| Decision | Status |
+|----------|--------|
+{% for adr in adr_list %}
+| {{ adr.title }} | {{ adr.status.value | title if adr.status and adr.status.value else adr.status | title }} |
+{% endfor %}
+
+Full ADRs are in `docs/decisions/`.
+{% endif %}
+
+---
+{% for feature in features %}
+## Step {{ loop.index + 2 }}: {{ feature.feature_name }}
+
+**Module:** `{{ feature.module_path }}`
+
+{{ feature.description }}
+
+{% if feature.acceptance_criteria %}
+**Acceptance criteria:**
+{% for criterion in feature.acceptance_criteria[:3] %}
+- {{ criterion }}
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+
+---
+
+## Testing
+
+Run the full test suite:
+
+```bash
+{% if primary_lang == 'typescript' %}
+npm test
+{% else %}
+pytest tests/ -v --cov={{ project_name | lower | replace(' ', '_') | replace('-', '_') }} --cov-report=term-missing
+{% endif %}
+```
+
+{% if sandbox_commands %}
+**Sandbox validation commands** (run in Docker):
+
+{% for cmd in sandbox_commands[:5] %}
+{{ loop.index }}. `{{ cmd.command }}` — {{ cmd.description }}
+{% endfor %}
+{% endif %}
+
+**Quality metrics from automated review:**
+- Quality score: {{ "%.0f" | format(quality_score) }}/100
+- Review verdict: {{ review_verdict | replace('_', ' ') | title }}
+{% if review_comments %}
+- Review comments:
+{% for comment in review_comments[:5] %}
+  - {{ comment }}
+{% endfor %}
+{% endif %}
+
+---
+
+## Running the Project
+
+```bash
+{% if primary_lang == 'typescript' %}
+npm run dev
+{% else %}
+python -m {{ project_name | lower | replace(' ', '_') | replace('-', '_') }}
+{% endif %}
+```
+
+---
+
+## Deployment
+
+The repository includes a GitHub Actions CI/CD pipeline in `.github/workflows/`.
+
+The pipeline runs on every push:
+
+1. **Lint & type-check** — `ruff check .` and `mypy --strict`
+2. **Test** — full suite with coverage threshold enforcement
+3. **Build** — Docker image build and validation
+4. **Deploy** — automatic on merge to `main`
+
+Secrets are managed via GitHub Secrets — see the workflow files for the required
+environment variable names.
+
+---
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feat/your-feature`
+3. Make your changes with tests
+4. Commit using Conventional Commits: `git commit -m "feat: add ..."`
+5. Open a pull request against `main`
+
+---
+
+## Next Steps
+
+- Explore the `docs/decisions/` directory for the full ADR history
+- Check `docs/architecture/` for system diagrams
+- Read `CONTRIBUTING.md` for the development workflow
+
+---
+
+## Source Code
+
+**GitHub:** [{{ repo_url }}]({{ repo_url }})
+
+If you found this walkthrough helpful, please star the repository ⭐ and share it
+with other developers building their portfolios.

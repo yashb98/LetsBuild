@@ -1,0 +1,116 @@
+{# YouTube Script Template — 5-7 minute video script for a portfolio project showcase.
+   Variables: project_name, one_liner, repo_url, features (list of feature objects with
+   feature_name and description), tech_stack (list of strings), adr_list (list of ADR
+   objects with title), quality_score (float), seniority_target (string). #}
+# YouTube Script: I Built {{ project_name }} — Here's How ({{ seniority_target | title }} Portfolio Project)
+
+---
+## [HOOK — 0:00-0:20]
+
+*[On screen: terminal / live demo clip]*
+
+"What if you could {{ one_liner | lower | trim('.') }}?  In this video, I'll show you
+exactly how I built {{ project_name }} from scratch — the architecture decisions, the
+hardest bugs, and what I learned along the way."
+
+---
+## [INTRO — 0:20-0:50]
+
+Hey everyone — welcome back to the channel.  Today we're diving deep into **{{ project_name }}**,
+a {{ seniority_target }}-level portfolio project I built to sharpen my skills
+in {{ tech_stack[:6] | join(', ') }}.
+
+By the end of this video you'll see:
+- The full architecture breakdown
+- Live walkthrough of the key features
+- The three biggest lessons I learned building this
+
+The source code is 100% open source — link in the description: {{ repo_url }}
+
+---
+## [PROBLEM — 0:50-1:30]
+
+*[Talking head / whiteboard]*
+
+Here's the problem I set out to solve: {{ one_liner }}
+
+Most implementations of this either ship without proper tests or skip architecture
+documentation entirely.  I wanted to build something production-ready — with tests,
+CI/CD, proper error handling, and real architecture decision records.
+
+---
+## [SOLUTION OVERVIEW — 1:30-2:30]
+
+*[Architecture diagram]*
+
+My solution is **{{ project_name }}**.  Built with {{ tech_stack[:6] | join(', ') }}.
+
+At a high level, the system has {{ features | length }} core components:
+{% for feature in features[:4] %}
+  - **{{ feature.feature_name }}**: {{ feature.description }}
+{% endfor %}
+
+The key design principles I followed:
+1. Clean separation of concerns
+2. Testable from day one
+3. Observable — logs and metrics everywhere
+
+---
+## [ARCHITECTURE DEEP-DIVE — 2:30-4:00]
+
+*[Code walkthrough in editor]*
+
+Let me show you the structure.  I'll start with the entry point and walk down
+through the layers.
+
+*[Walk through file tree, highlight key modules]*
+
+One of the most interesting decisions I made was captured in an Architecture
+Decision Record:
+
+{% if adr_list %}
+{% for adr in adr_list[:2] %}
+  - {{ adr.title }}
+{% endfor %}
+{% else %}
+  - (see repo docs/decisions/)
+{% endif %}
+
+I'll drop links to the full ADRs in the description.
+
+---
+## [FEATURE WALKTHROUGH — 4:00-5:30]
+
+*[Live demo / screen recording]*
+
+Now let me show you this in action.
+
+{% for feature in features[:4] %}
+**{{ feature.feature_name }}** — {{ feature.description }}
+
+{% endfor %}
+*[Demo each feature]*
+
+---
+## [TESTING & QUALITY — 5:30-6:00]
+
+The project has a quality score of **{{ "%.0f" | format(quality_score) }}/100** from
+the automated review.  Here's how the test suite looks:
+
+*[Show test output in terminal]*
+
+---
+## [CALL TO ACTION — 6:00-6:30]
+
+If you found this useful, hit the like button and subscribe — I'm building one
+of these every week.
+
+**Links in the description:**
+- GitHub repo: {{ repo_url }}
+- Full blog post with code explanations
+- Architecture Decision Records in docs/decisions/
+
+Drop any questions in the comments.  See you in the next one!
+
+---
+*[END SCREEN — 6:30]*

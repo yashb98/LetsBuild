@@ -1,0 +1,91 @@
+{# LinkedIn Carousel Template — 8-10 structured slides for a portfolio project showcase.
+   Variables: project_name, one_liner, repo_url, features (list with feature_name,
+   description, estimated_complexity), tech_stack (list of strings),
+   quality_score (float), review_verdict (string), seniority_target (string),
+   file_tree (list of nodes with path). #}
+## Slide 1: Title
+
+🚀 I built {{ project_name }}
+
+{{ one_liner }}
+
+({{ seniority_target | title }} Portfolio Project)
+→ Swipe to see how
+
+---
+
+## Slide 2: The Problem
+
+Most devs build tutorial clones.
+
+❌ No architecture decisions documented
+❌ No real test suite
+❌ Never validated in a production-like environment
+
+I wanted to fix that — here's what I built instead.
+
+---
+
+## Slide 3: The Solution
+
+**{{ project_name }}**
+
+✅ {{ one_liner }}
+
+Built with: {{ tech_stack[:5] | join(', ') }}
+
+Every decision documented. Every line tested.
+
+---
+
+## Slide 4: Architecture
+
+{{ file_tree | length }} modules. Clean structure.
+
+{% for node in file_tree[:6] %}
+• {{ node.path }}
+{% endfor %}
+
+Every major decision is documented in an Architecture Decision Record (ADR).
+
+---
+{% for feature in features[:4] %}
+## Slide {{ loop.index + 4 }}: Feature {{ loop.index }} — {{ feature.feature_name }}
+
+{{ feature.description }}
+
+Complexity: {{ '★' * feature.estimated_complexity }}{{ '☆' * (10 - feature.estimated_complexity) }}
+
+---
+{% endfor %}
+
+## Slide {{ (features[:4] | length) + 5 }}: Tech Stack
+
+What I used to build it:
+
+{% for tech in tech_stack[:8] %}
+• {{ tech }}
+{% endfor %}
+
+---
+
+## Slide {{ (features[:4] | length) + 6 }}: Quality Metrics
+
+Numbers don't lie:
+
+📊 Quality score: {{ "%.0f" | format(quality_score) }}/100
+✅ Review verdict: {{ review_verdict | replace('_', ' ') | title }}
+🔒 Sandbox validated before publishing
+📝 Architecture Decision Records included
+
+---
+
+## Slide {{ (features[:4] | length) + 7 }}: Call to Action
+
+The full source code is on GitHub — open source, MIT licensed.
+
+⭐ Star the repo: {{ repo_url }}
+
+What would you add next? Drop it in the comments 👇
+
+Follow for one new portfolio project every week.
