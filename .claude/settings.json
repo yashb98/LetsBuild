@@ -1,0 +1,57 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/scripts/post-edit-lint.sh $TOOL_INPUT_PATH"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/scripts/pre-bash-guard.sh \"$TOOL_INPUT\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/scripts/on-stop-summary.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Grep",
+      "Glob",
+      "LS",
+      "Bash(ruff *)",
+      "Bash(mypy *)",
+      "Bash(pytest *)",
+      "Bash(python -m letsbuild*)",
+      "Bash(docker build*)",
+      "Bash(docker run*)",
+      "Bash(pip install*)",
+      "Bash(git *)"
+    ],
+    "deny": [
+      "Bash(rm -rf /)*",
+      "Bash(curl * | bash)*",
+      "Bash(wget * | bash)*"
+    ]
+  }
+}

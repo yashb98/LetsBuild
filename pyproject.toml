@@ -1,0 +1,102 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "letsbuild"
+version = "3.0.0-alpha"
+description = "Autonomous Portfolio Factory — JD in, published GitHub repo out."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [
+    { name = "Yash Bishnoi", email = "yashb98@github.com" },
+]
+keywords = ["ai", "portfolio", "agentic", "claude", "autonomous", "job-search"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Code Generators",
+]
+dependencies = [
+    "anthropic>=0.40.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.7.0",
+    "typer[all]>=0.12.0",
+    "structlog>=24.1.0",
+    "hnswlib>=0.8.0",
+    "docker>=7.0.0",
+    "pyyaml>=6.0",
+    "jinja2>=3.1.0",
+    "aiosqlite>=0.20.0",
+    "python-dotenv>=1.0.0",
+    "tenacity>=8.2.0",
+    "rich>=13.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.5.0",
+    "mypy>=1.10.0",
+    "pre-commit>=3.7.0",
+    "pip-audit>=2.7.0",
+    "respx>=0.21.0",
+]
+web = [
+    "fastapi>=0.111.0",
+    "uvicorn>=0.30.0",
+    "websockets>=12.0",
+]
+local = [
+    "vllm>=0.5.0",
+    "torch>=2.3.0",
+]
+all = ["letsbuild[dev,web,local]"]
+
+[project.scripts]
+letsbuild = "letsbuild.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/yashb98/LetsBuild"
+Documentation = "https://yashb98.github.io/LetsBuild"
+Repository = "https://github.com/yashb98/LetsBuild"
+Issues = "https://github.com/yashb98/LetsBuild/issues"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM", "TCH", "RUF"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["letsbuild"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks integration tests requiring external services",
+]
+
+[tool.coverage.run]
+source = ["letsbuild"]
+omit = ["tests/*", "letsbuild/cli.py"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true

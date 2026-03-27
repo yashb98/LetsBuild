@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Environment
+.env
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific
+data/
+*.db
+*.index
+/tmp/letsbuild/
+sandbox/build/
+
+# Secrets — NEVER commit these
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Node (for web dashboard)
+node_modules/
+web/.next/
+web/out/
+
+# Docker
+sandbox/*.tar

@@ -1,0 +1,105 @@
+# LetsBuild Configuration — v3.0
+# Copy to letsbuild.yaml and fill in your values.
+# Secrets MUST be set as environment variables, not in this file.
+
+# ── User Profile ──────────────────────────────────────────
+user:
+  name: "Yash Bishnoi"
+  github_username: "yashb98"
+  linkedin_url: "https://linkedin.com/in/yashb98"
+  location: "Edinburgh, UK"
+  experience_years: 3
+  current_skills:
+    - python
+    - machine-learning
+    - deep-learning
+    - fastapi
+    - docker
+    - pytorch
+    - sql
+    - power-bi
+
+# ── AI Models ─────────────────────────────────────────────
+models:
+  default_provider: anthropic
+  anthropic:
+    architect_model: "claude-opus-4-20250514"
+    code_gen_model: "claude-sonnet-4-20250514"
+    review_model: "claude-opus-4-20250514"
+    extraction_model: "claude-haiku-4-5-20251001"
+  fallback:
+    code_gen: "qwen3-8b"        # via vLLM local
+    research: "deepseek-v3"     # via API
+  local:
+    enabled: false
+    vllm_endpoint: "http://localhost:8000/v1"
+
+# ── Pipeline Settings ─────────────────────────────────────
+pipeline:
+  budget_per_run_gbp: 40.0
+  sandbox_timeout_minutes: 30
+  max_retries_per_layer: 2
+  max_retries_per_task: 3
+  quality_threshold: 70
+  enable_learning: true
+  distill_every_n_runs: 10
+
+# ── GitHub Settings ───────────────────────────────────────
+github:
+  default_visibility: private   # private | public
+  commit_spread_days: [3, 7]
+  enable_ci_cd: true
+  topics_auto_generate: true
+  repo_name_prefix: ""          # optional prefix
+
+# ── Sandbox Settings ──────────────────────────────────────
+sandbox:
+  image: "letsbuild/sandbox:latest"
+  cpu_limit: 4
+  memory_limit_gb: 8
+  disk_limit_gb: 20
+  pool_size: 3
+  network_outbound: true
+  network_inbound: false
+
+# ── Notifications ─────────────────────────────────────────
+notifications:
+  telegram:
+    enabled: false
+    # bot_token: set LETSBUILD_TELEGRAM_BOT_TOKEN env var
+    chat_id: ""
+  slack:
+    enabled: false
+    # webhook_url: set LETSBUILD_SLACK_WEBHOOK env var
+  discord:
+    enabled: false
+    # webhook_url: set LETSBUILD_DISCORD_WEBHOOK env var
+
+# ── Memory Settings ───────────────────────────────────────
+memory:
+  database_path: "./data/letsbuild.db"
+  hnsw_index_path: "./data/reasoning_bank.index"
+  company_cache_ttl_days: 90
+  judge_verdict_ttl_days: 180
+  enable_consolidation: true
+
+# ── Skills ────────────────────────────────────────────────
+skills:
+  directory: "./skills"
+  community_registry_url: ""    # future: community skill registry
+  enabled:
+    - fullstack
+    - ml-pipeline
+    - data-eng
+    - agentic-ai
+    - data-science
+    - cv
+    - nlp
+    - platform
+    - realtime
+    - api-backend
+    - autonomous
+    - mobile
+    - blockchain
+    - embedded-iot
+    - llm-finetune

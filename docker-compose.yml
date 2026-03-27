@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  # LetsBuild API + MCP Server
+  letsbuild:
+    build: .
+    ports:
+      - "8080:8080"     # API
+      - "8081:8081"     # MCP Server
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - SERPAPI_KEY=${SERPAPI_KEY}
+    volumes:
+      - ./data:/app/data
+      - ./skills:/app/skills:ro
+      - /var/run/docker.sock:/var/run/docker.sock  # For sandbox management
+    depends_on:
+      - redis
+
+  # Redis for pipeline state and caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  # Next.js Dashboard (optional)
+  web:
+    build: ./web
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://letsbuild:8080
+    depends_on:
+      - letsbuild
+
+volumes:
+  redis-data:

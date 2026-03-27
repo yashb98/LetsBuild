@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "letsbuild": {
+      "command": "python",
+      "args": ["-m", "letsbuild.gateway.mcp_server"],
+      "env": {
+        "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}",
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}",
+        "SERPAPI_KEY": "${SERPAPI_KEY}",
+        "LETSBUILD_CONFIG": "./letsbuild.yaml"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "./"],
+      "env": {}
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}
