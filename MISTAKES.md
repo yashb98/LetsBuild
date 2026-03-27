@@ -12,3 +12,16 @@
 - **What:** `pytest.raises(match="between 1.0 and 10.0")` has `.` which is a regex metachar
 - **Fix:** Changed to raw strings with escaped dots: `match=r"between 1\\.0 and 10\\.0"`
 - **Lesson:** Always use raw strings for `pytest.raises(match=...)` patterns.
+
+## 2026-03-27 — Steps 12-22 (Foundation Phase)
+
+### Mistake 3: TC003 lint rule for stdlib imports in type hints
+- **What:** ruff flags `from collections.abc import Callable` and `from pathlib import Path` as TC003 (move to TYPE_CHECKING)
+- **Impact:** These are used in function signatures which need runtime access with `from __future__ import annotations`
+- **Fix:** Add `# noqa: TC003` to suppress. Similarly `# noqa: TC002` for third-party imports in test files.
+- **Lesson:** When using `from __future__ import annotations`, TC003 is often a false positive for function parameter types. Suppress with noqa rather than moving to TYPE_CHECKING.
+
+### Mistake 4: Variable naming in loops (B007)
+- **What:** `for key in list(...)` where key is unused triggers B007
+- **Fix:** Rename to `_key` to indicate intentionally unused
+- **Lesson:** Prefix unused loop variables with `_`.
