@@ -37,3 +37,8 @@
 - **What:** Skill extractor agent created taxonomy.json but not skill_extractor.py
 - **Fix:** Launched a second agent to create the missing file
 - **Lesson:** When giving agents multiple files to create, verify all outputs exist before proceeding. Always glob/check after agent completion.
+
+### Mistake 7: Subagent missing file output (repeat of #6)
+- **What:** Step 49 agent only created fullstack.skill.md, missing 4 others. Step 50 agent created source but not test file.
+- **Fix:** Launched follow-up agents for missing files
+- **Lesson:** This is a recurring pattern. ALWAYS glob to verify file count matches expected after agent completion. Never assume all files were created.
