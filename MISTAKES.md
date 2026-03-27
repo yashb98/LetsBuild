@@ -42,3 +42,8 @@
 - **What:** Step 49 agent only created fullstack.skill.md, missing 4 others. Step 50 agent created source but not test file.
 - **Fix:** Launched follow-up agents for missing files
 - **Lesson:** This is a recurring pattern. ALWAYS glob to verify file count matches expected after agent completion. Never assume all files were created.
+
+### Mistake 8: Pydantic strict mode rejects LLM tool_use output
+- **What:** `ProjectSpec.model_validate(raw)` fails on LLM output because tool_use returns plain string dicts, not typed Python objects. Strict mode rejects string→enum coercion.
+- **Fix:** Use `model_validate(raw, strict=False)` for LLM/external data.
+- **Lesson:** Always use `strict=False` when validating data from LLM tool_use responses or any external JSON source. Strict mode is for internal Python-to-Python validation only.
