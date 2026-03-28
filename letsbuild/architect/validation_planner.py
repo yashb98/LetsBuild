@@ -12,63 +12,71 @@ from letsbuild.models.config_models import SkillConfig  # noqa: TC001
 
 logger = structlog.get_logger()
 
-_PYTHON_KEYWORDS = frozenset({
-    "python",
-    "fastapi",
-    "django",
-    "flask",
-    "pytest",
-    "pydantic",
-    "sqlalchemy",
-    "celery",
-    "pandas",
-    "numpy",
-    "scipy",
-    "torch",
-    "tensorflow",
-    "streamlit",
-    "typer",
-    "httpx",
-    "aiohttp",
-    "uvicorn",
-})
+_PYTHON_KEYWORDS = frozenset(
+    {
+        "python",
+        "fastapi",
+        "django",
+        "flask",
+        "pytest",
+        "pydantic",
+        "sqlalchemy",
+        "celery",
+        "pandas",
+        "numpy",
+        "scipy",
+        "torch",
+        "tensorflow",
+        "streamlit",
+        "typer",
+        "httpx",
+        "aiohttp",
+        "uvicorn",
+    }
+)
 
-_NODE_KEYWORDS = frozenset({
-    "node",
-    "nodejs",
-    "node.js",
-    "typescript",
-    "react",
-    "next.js",
-    "nextjs",
-    "vue",
-    "angular",
-    "express",
-    "nestjs",
-    "npm",
-    "deno",
-    "bun",
-    "svelte",
-    "tailwind",
-    "vite",
-})
+_NODE_KEYWORDS = frozenset(
+    {
+        "node",
+        "nodejs",
+        "node.js",
+        "typescript",
+        "react",
+        "next.js",
+        "nextjs",
+        "vue",
+        "angular",
+        "express",
+        "nestjs",
+        "npm",
+        "deno",
+        "bun",
+        "svelte",
+        "tailwind",
+        "vite",
+    }
+)
 
-_GO_KEYWORDS = frozenset({
-    "go",
-    "golang",
-    "gin",
-    "echo",
-    "fiber",
-})
+_GO_KEYWORDS = frozenset(
+    {
+        "go",
+        "golang",
+        "gin",
+        "echo",
+        "fiber",
+    }
+)
 
-_RUST_KEYWORDS = frozenset({
-    "rust",
-    "cargo",
-    "tokio",
-    "actix",
-    "axum",
-    "warp",
-})
+_RUST_KEYWORDS = frozenset(
+    {
+        "rust",
+        "cargo",
+        "tokio",
+        "actix",
+        "axum",
+        "warp",
+    }
+)
 
 
 class ValidationPlanner:

@@ -55,3 +55,20 @@ Each entry: **what went wrong**, **why**, **how to avoid**.
 - **What:** `test_skill_files_all_parse` asserted `== 5` skill files. After adding 10 more, it failed.
 - **Why:** Test hardcoded an exact count instead of a minimum bound.
 - **How to avoid:** Use `>= N` assertions instead of `== N` for counts that grow over time. Or update counts when adding new files.
+
+### Phase 8 (Steps 96-100) — Launch Prep
+
+**Gotcha 17: Pydantic model field names differ from prompt descriptions**
+- **What:** Integration tests revealed many model field mismatches: `CodeModule.module_path` (not `file_path`), `GapItem.skill_name` (not `skill`), `AgentOutput.agent_role` (not `role`), etc.
+- **Why:** Subagents were given approximate model specs rather than reading actual code. Same pattern as Gotcha 9.
+- **How to avoid:** ALWAYS have subagents read the actual model files. This is the single most common source of bugs. Consider adding a pre-check step that validates model instantiation before writing integration code.
+
+**Gotcha 18: sandbox/Dockerfile mkdir runs before USER switch**
+- **What:** `mkdir /mnt/workspace` was after `USER sandbox` but parent dirs were root-owned, causing permission denied.
+- **Why:** Docker USER directive changes who runs subsequent commands, but doesn't change existing dir ownership.
+- **How to avoid:** Create all directories and chown them BEFORE the USER directive in Dockerfiles.
+
+**Gotcha 19: CI workflow targeted wrong branch name**
+- **What:** `.github/workflows/ci.yml` had `branches: [main]` but the repo uses `master`.
+- **Why:** Template assumed GitHub default branch name.
+- **How to avoid:** Always check actual default branch (`git branch --show-current` or `git remote show origin`) before writing CI configs.

@@ -81,11 +81,7 @@ class SkillLoaderMiddleware(Middleware):
         # Filter by role category if JD analysis is available
         if state.jd_analysis is not None:
             role_category = state.jd_analysis.role_category.value
-            matched = [
-                skill
-                for skill in all_skills
-                if self._matches_role(skill, role_category)
-            ]
+            matched = [skill for skill in all_skills if self._matches_role(skill, role_category)]
             await self._log.ainfo(
                 "skill_loader_filtered",
                 total_skills=len(all_skills),

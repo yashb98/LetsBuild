@@ -19,7 +19,12 @@ if TYPE_CHECKING:
 import aiosqlite
 import structlog
 
-from letsbuild.models.memory_models import DistilledPattern, JudgeVerdict, MemoryRecord, VerdictOutcome
+from letsbuild.models.memory_models import (
+    DistilledPattern,
+    JudgeVerdict,
+    MemoryRecord,
+    VerdictOutcome,
+)
 from letsbuild.models.shared import PipelineMetrics
 
 __all__ = ["MemoryStorage"]

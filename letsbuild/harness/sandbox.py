@@ -98,9 +98,7 @@ class SandboxManager:
                 self._client = docker.from_env()  # type: ignore[union-attr]
             except DockerException as exc:
                 logger.error("sandbox.docker_connect_failed", error=str(exc))
-                raise RuntimeError(
-                    f"Failed to connect to Docker daemon: {exc}"
-                ) from exc
+                raise RuntimeError(f"Failed to connect to Docker daemon: {exc}") from exc
         return self._client
 
     # -- public API ---------------------------------------------------------
@@ -126,9 +124,7 @@ class SandboxManager:
                     detach=True,
                     nano_cpus=nano_cpus,
                     mem_limit=mem_bytes,
-                    storage_opt={"size": f"{cfg.disk_limit_gb}g"}
-                    if cfg.disk_limit_gb
-                    else None,
+                    storage_opt={"size": f"{cfg.disk_limit_gb}g"} if cfg.disk_limit_gb else None,
                     security_opt=["no-new-privileges"],
                     network_mode="bridge",
                     stdin_open=False,
@@ -141,9 +137,7 @@ class SandboxManager:
                     image=cfg.base_image,
                     error=str(exc),
                 )
-                raise RuntimeError(
-                    f"Failed to provision sandbox container: {exc}"
-                ) from exc
+                raise RuntimeError(f"Failed to provision sandbox container: {exc}") from exc
 
             sandbox = Sandbox(
                 container_id=container.id,
@@ -184,9 +178,7 @@ class SandboxManager:
                     "sandbox.container_not_found",
                     container_id=sandbox.container_id,
                 )
-                raise RuntimeError(
-                    f"Sandbox container {sandbox.container_id} not found"
-                ) from exc
+                raise RuntimeError(f"Sandbox container {sandbox.container_id} not found") from exc
 
             start = time.monotonic()
             timed_out = False
@@ -246,9 +238,7 @@ class SandboxManager:
             try:
                 container = client.containers.get(sandbox.container_id)
             except NotFound as exc:
-                raise RuntimeError(
-                    f"Sandbox container {sandbox.container_id} not found"
-                ) from exc
+                raise RuntimeError(f"Sandbox container {sandbox.container_id} not found") from exc
 
             src = Path(local_path)
             if not src.exists():
@@ -270,9 +260,7 @@ class SandboxManager:
                     container_path=container_path,
                     error=str(exc),
                 )
-                raise RuntimeError(
-                    f"Failed to copy files into sandbox: {exc}"
-                ) from exc
+                raise RuntimeError(f"Failed to copy files into sandbox: {exc}") from exc
 
             logger.info(
                 "sandbox.copy_to",
@@ -308,9 +296,7 @@ class SandboxManager:
                     container_id=sandbox.container_id,
                     error=str(exc),
                 )
-                raise RuntimeError(
-                    f"Failed to clean up sandbox container: {exc}"
-                ) from exc
+                raise RuntimeError(f"Failed to clean up sandbox container: {exc}") from exc
 
         await asyncio.to_thread(_cleanup_sync)
         sandbox.status = "stopped"
