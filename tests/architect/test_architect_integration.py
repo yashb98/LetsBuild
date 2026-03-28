@@ -465,7 +465,7 @@ async def test_architect_with_gap_analysis() -> None:
 def test_skill_files_all_parse() -> None:
     """All .skill.md files in skills/ parse without errors."""
     skill_files = sorted(_SKILLS_DIR.glob("*.skill.md"))
-    assert len(skill_files) == 5, f"Expected 5 skill files, found {len(skill_files)}"
+    assert len(skill_files) == 15, f"Expected 15 skill files, found {len(skill_files)}"
 
     parser = SkillParser()
     for skill_file in skill_files:

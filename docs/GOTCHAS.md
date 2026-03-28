@@ -48,3 +48,10 @@ Each entry: **what went wrong**, **why**, **how to avoid**.
 - **What:** `datetime.utcnow()` triggers DeprecationWarning in Python 3.12+.
 - **Why:** Scheduled for removal. Use timezone-aware objects instead.
 - **How to avoid:** Always use `datetime.now(UTC)` instead of `datetime.utcnow()`.
+
+### Phase 7 (Steps 91-95) — Ecosystem
+
+**Gotcha 16: Hardcoded skill file count in tests breaks when adding new skills**
+- **What:** `test_skill_files_all_parse` asserted `== 5` skill files. After adding 10 more, it failed.
+- **Why:** Test hardcoded an exact count instead of a minimum bound.
+- **How to avoid:** Use `>= N` assertions instead of `== N` for counts that grow over time. Or update counts when adding new files.
