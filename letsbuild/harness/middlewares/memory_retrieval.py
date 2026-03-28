@@ -145,9 +145,9 @@ class MemoryRetrievalMiddleware(Middleware):
             )
             return
 
-        # Deserialise and inject
+        # Deserialise and inject (strict=False to allow ISO datetime string coercion)
         try:
-            profile = CompanyProfile.model_validate(record.data)
+            profile = CompanyProfile.model_validate(record.data, strict=False)
         except Exception as exc:
             await self._log.awarning(
                 "memory_retrieval.company_profile.deserialise_error",

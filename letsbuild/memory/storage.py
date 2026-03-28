@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 import aiosqlite
 import structlog
 
-from letsbuild.models.memory_models import DistilledPattern, JudgeVerdict, MemoryRecord
+from letsbuild.models.memory_models import DistilledPattern, JudgeVerdict, MemoryRecord, VerdictOutcome
 from letsbuild.models.shared import PipelineMetrics
 
 __all__ = ["MemoryStorage"]
@@ -234,7 +234,7 @@ class MemoryStorage:
         return JudgeVerdict(
             verdict_id=row["verdict_id"],
             run_id=row["run_id"],
-            outcome=row["outcome"],
+            outcome=VerdictOutcome(row["outcome"]),
             sandbox_passed=bool(row["sandbox_passed"]),
             quality_score=row["quality_score"],
             retry_count_total=row["retry_count_total"],
