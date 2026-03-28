@@ -189,5 +189,55 @@ def stats() -> None:
     rprint("[bold green]\u2713 Command registered[/] \u2014 memory stats not yet implemented")
 
 
+@app.command()
+def metrics(
+    run_id: Annotated[
+        str | None,
+        typer.Option("--run-id", help="Show metrics for a specific run."),
+    ] = None,
+    last: Annotated[
+        int,
+        typer.Option("--last", help="Show metrics for the last N runs."),
+    ] = 5,
+) -> None:
+    """Show pipeline performance metrics — timing, cost, quality scores."""
+    if run_id:
+        rprint(f"[bold cyan]Metrics:[/] for run [bold]{run_id}[/bold]...")
+    else:
+        rprint(f"[bold cyan]Metrics:[/] last [bold]{last}[/bold] runs...")
+    rprint("[bold green]\u2713 Command registered[/] \u2014 metrics not yet implemented")
+
+
+@app.command()
+def config(
+    show: Annotated[
+        bool,
+        typer.Option("--show", help="Display current configuration."),
+    ] = False,
+    validate: Annotated[
+        bool,
+        typer.Option("--validate", help="Validate letsbuild.yaml against AppConfig schema."),
+    ] = False,
+    init: Annotated[
+        bool,
+        typer.Option("--init", help="Generate letsbuild.yaml.example in current directory."),
+    ] = False,
+) -> None:
+    """Manage LetsBuild configuration."""
+    if init:
+        rprint("[bold cyan]Config:[/] generating letsbuild.yaml.example...")
+        rprint("[bold green]\u2713 Command registered[/] \u2014 config init not yet implemented")
+    elif validate:
+        rprint("[bold cyan]Config:[/] validating letsbuild.yaml...")
+        rprint(
+            "[bold green]\u2713 Command registered[/] \u2014 config validate not yet implemented"
+        )
+    elif show:
+        rprint("[bold cyan]Config:[/] current configuration...")
+        rprint("[bold green]\u2713 Command registered[/] \u2014 config show not yet implemented")
+    else:
+        rprint("[bold yellow]Usage:[/] use --show, --validate, or --init")
+
+
 if __name__ == "__main__":
     app()
