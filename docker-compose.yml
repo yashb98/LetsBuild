@@ -1,40 +1,94 @@
-version: "3.9"
-
 services:
-  # LetsBuild API + MCP Server
-  letsbuild:
-    build: .
+  # ── Main LetsBuild Application ─────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: letsbuild/app:latest
     ports:
-      - "8080:8080"     # API
-      - "8081:8081"     # MCP Server
+      - "8000:8000"   # FastAPI / MCP Server
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
       - SERPAPI_KEY=${SERPAPI_KEY}
+      - LETSBUILD_MEMORY_DATABASE_PATH=/app/data/letsbuild.db
+      - LETSBUILD_MEMORY_HNSW_INDEX_PATH=/app/data/reasoning_bank.index
+      - REDIS_URL=redis://redis:6379/0
     volumes:
       - ./data:/app/data
       - ./skills:/app/skills:ro
+      - ./letsbuild.yaml:/app/letsbuild.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock  # For sandbox management
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
 
-  # Redis for pipeline state and caching
+  # ── Sandbox Service (Code Generation) ─────────────────────────────────────
+  sandbox:
+    build:
+      context: sandbox/
+      dockerfile: Dockerfile
+    image: letsbuild/sandbox:latest
+    # Sandbox containers are launched on-demand by the app via Docker SDK.
+    # This service definition pre-builds the image; actual sandbox runs use
+    # docker.from_env().containers.run() with per-run resource limits.
+    profiles:
+      - build-only  # Does not start with `docker compose up`; used for `docker compose build`
+    volumes:
+      - sandbox-workspace:/mnt/workspace
+      - ./skills:/mnt/skills:ro
+      - sandbox-outputs:/mnt/outputs
+    # Runtime resource limits applied by the Docker SDK at container creation:
+    #   cpus: "4"
+    #   mem_limit: "8g"
+    #   pids_limit: 512
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    tmpfs:
+      - /tmp:size=1g
+
+  # ── Redis (Pipeline State + Caching) ─────────────────────────────────────
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
     volumes:
       - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
-  # Next.js Dashboard (optional)
+  # ── Next.js Web Dashboard (optional) ──────────────────────────────────────
   web:
-    build: ./web
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    image: letsbuild/web:latest
+    profiles:
+      - web
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://letsbuild:8080
+      - NEXT_PUBLIC_API_URL=http://app:8000
     depends_on:
-      - letsbuild
+      app:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   redis-data:
+  sandbox-workspace:
+  sandbox-outputs:

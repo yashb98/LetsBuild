@@ -1,92 +1,197 @@
 # LetsBuild Configuration — v3.0
-# Copy to letsbuild.yaml and fill in your values.
-# Secrets MUST be set as environment variables, not in this file.
+# ─────────────────────────────────────────────────────────────────────────────
+# Copy this file to letsbuild.yaml and fill in your values.
+#
+# SECURITY: API keys and tokens MUST be set as environment variables.
+#           Do NOT store real secrets in this file or in letsbuild.yaml.
+#
+# Environment variable overrides follow the pattern:
+#   LETSBUILD_<SECTION>_<KEY>   (all uppercase, nested with _)
+#   e.g. LETSBUILD_PIPELINE_MAX_BUDGET_GBP=25.0
+#
+# Required env vars (never put in YAML):
+#   ANTHROPIC_API_KEY   — Anthropic Claude API key
+#   GITHUB_TOKEN        — GitHub personal access token (repo + workflow scope)
+#   SERPAPI_KEY         — SerpAPI key for company research (optional)
+# ─────────────────────────────────────────────────────────────────────────────
 
-# ── User Profile ──────────────────────────────────────────
+# ── API Key References ─────────────────────────────────────────────────────
+# Reference only — actual values come from environment variables.
+api:
+  # Set via: export ANTHROPIC_API_KEY="sk-ant-..."
+  anthropic_key: null
+  # Set via: export GITHUB_TOKEN="ghp_..."
+  github_token: null
+  # Set via: export SERPAPI_KEY="..."
+  serpapi_key: null
+
+# ── User Profile ──────────────────────────────────────────────────────────
 user:
-  name: "Yash Bishnoi"
-  github_username: "yashb98"
-  linkedin_url: "https://linkedin.com/in/yashb98"
-  location: "Edinburgh, UK"
+  name: "Your Name"
+  github_username: "your-github-username"
+  linkedin_url: "https://linkedin.com/in/your-handle"
+  location: "City, Country"
   experience_years: 3
   current_skills:
     - python
-    - machine-learning
-    - deep-learning
     - fastapi
     - docker
-    - pytorch
-    - sql
-    - power-bi
+    - postgresql
 
-# ── AI Models ─────────────────────────────────────────────
+# ── AI Models ─────────────────────────────────────────────────────────────
 models:
+  # Provider: anthropic | openai | local
   default_provider: anthropic
+
   anthropic:
+    # Architect & Review: Opus for highest quality design decisions
     architect_model: "claude-opus-4-20250514"
     code_gen_model: "claude-sonnet-4-20250514"
     review_model: "claude-opus-4-20250514"
+    # Extraction: Haiku for fast, cheap structured output
     extraction_model: "claude-haiku-4-5-20251001"
+    research_model: "claude-sonnet-4-20250514"
+    content_model: "claude-sonnet-4-20250514"
+
+  # Fallback models (used when primary model is unavailable or over budget)
   fallback:
-    code_gen: "qwen3-8b"        # via vLLM local
-    research: "deepseek-v3"     # via API
+    code_gen: "qwen3-8b"       # via local vLLM endpoint
+    research: "deepseek-v3"    # via DeepSeek API
+    content: "qwen3-8b"        # via local vLLM endpoint
+
+  # Local model serving via vLLM (optional)
   local:
     enabled: false
-    vllm_endpoint: "http://localhost:8000/v1"
+    vllm_endpoint: "http://localhost:8001/v1"
+    model_name: "Qwen/Qwen3-8B-Instruct"
 
-# ── Pipeline Settings ─────────────────────────────────────
+# ── Pipeline Settings ──────────────────────────────────────────────────────
 pipeline:
-  budget_per_run_gbp: 40.0
-  sandbox_timeout_minutes: 30
+  # Maximum API spend per run in GBP. BudgetGate enforces this hard limit.
+  max_budget_gbp: 50.0
+
+  # QualityGate threshold (0-100). Runs scoring below this are blocked.
+  quality_threshold: 70.0
+
+  # Git commit spread: realistic history distributed over this many days.
+  spread_days: 5
+
+  # Maximum retries per pipeline layer before marking as failed.
   max_retries_per_layer: 2
+
+  # Maximum retries per code generation task (Coder retry-with-feedback).
   max_retries_per_task: 3
-  quality_threshold: 70
+
+  # Sandbox timeout in minutes per layer execution.
+  sandbox_timeout_minutes: 30
+
+  # Enable ReasoningBank learning (JUDGE → DISTILL → CONSOLIDATE cycle).
   enable_learning: true
+
+  # DISTILL patterns from JUDGE verdicts every N runs.
   distill_every_n_runs: 10
 
-# ── GitHub Settings ───────────────────────────────────────
-github:
-  default_visibility: private   # private | public
-  commit_spread_days: [3, 7]
-  enable_ci_cd: true
-  topics_auto_generate: true
-  repo_name_prefix: ""          # optional prefix
+  # Abort the pipeline if ≥ this many layers fail.
+  max_layer_failures: 3
 
-# ── Sandbox Settings ──────────────────────────────────────
+# ── GitHub Publisher ───────────────────────────────────────────────────────
+publisher:
+  # Your GitHub username (required for repo creation).
+  owner: "your-github-username"
+
+  # Optional: publish to a GitHub org instead of personal account.
+  org: null  # e.g. "my-org"
+
+  # Repository visibility. Always start private; promote to public manually.
+  private: true
+
+  # Auto-generate SEO-friendly repo topics from JD keywords.
+  topics_auto_generate: true
+
+  # Optional prefix for all generated repo names (e.g. "portfolio-").
+  repo_name_prefix: ""
+
+  # Number of days over which to spread the fake-but-realistic commit history.
+  commit_spread_days: [3, 7]
+
+  # Add GitHub Actions CI/CD to every generated project.
+  enable_ci_cd: true
+
+# ── Sandbox ───────────────────────────────────────────────────────────────
 sandbox:
+  # Docker image used for code generation sandboxes.
   image: "letsbuild/sandbox:latest"
+
+  # Resource limits applied per sandbox container at runtime.
   cpu_limit: 4
-  memory_limit_gb: 8
+  memory_limit: "8g"
   disk_limit_gb: 20
+
+  # Number of pre-warmed standby sandbox containers in the pool.
   pool_size: 3
+
+  # Network policy: outbound allowed (pip install), inbound blocked.
   network_outbound: true
   network_inbound: false
 
-# ── Notifications ─────────────────────────────────────────
-notifications:
-  telegram:
-    enabled: false
-    # bot_token: set LETSBUILD_TELEGRAM_BOT_TOKEN env var
-    chat_id: ""
-  slack:
-    enabled: false
-    # webhook_url: set LETSBUILD_SLACK_WEBHOOK env var
-  discord:
-    enabled: false
-    # webhook_url: set LETSBUILD_DISCORD_WEBHOOK env var
+  # Maximum sandbox container lifetime in minutes.
+  timeout_minutes: 30
 
-# ── Memory Settings ───────────────────────────────────────
+# ── Memory & ReasoningBank ─────────────────────────────────────────────────
 memory:
-  database_path: "./data/letsbuild.db"
+  # Path to the SQLite database file (relative to working directory).
+  db_path: "./data/letsbuild.db"
+
+  # Path to the HNSW index file for semantic similarity search.
   hnsw_index_path: "./data/reasoning_bank.index"
-  company_cache_ttl_days: 90
+
+  # HNSW embedding dimension (must match the embedding model output size).
+  hnsw_dim: 384
+
+  # How long to cache company research profiles before refreshing (days).
+  cache_ttl_days: 90
+
+  # How long to retain JUDGE verdicts (days). Used for DISTILL and analytics.
   judge_verdict_ttl_days: 180
+
+  # Enable EWC++ catastrophic forgetting prevention during CONSOLIDATE.
   enable_consolidation: true
 
-# ── Skills ────────────────────────────────────────────────
+# ── Notifications ─────────────────────────────────────────────────────────
+notifications:
+  # Log to stdout always. Additional channels below.
+  channels: ["log"]  # Options: log | telegram | slack | discord | websocket
+
+  telegram:
+    enabled: false
+    # Set via: export LETSBUILD_TELEGRAM_BOT_TOKEN="..."
+    bot_token: null
+    chat_id: ""  # Your Telegram chat/channel ID
+
+  slack:
+    enabled: false
+    # Set via: export LETSBUILD_SLACK_WEBHOOK="https://hooks.slack.com/..."
+    webhook_url: null
+
+  discord:
+    enabled: false
+    # Set via: export LETSBUILD_DISCORD_WEBHOOK="https://discord.com/api/webhooks/..."
+    webhook_url: null
+
+  websocket:
+    enabled: false
+    # WebSocket push for the Next.js dashboard.
+    port: 8001
+
+# ── Skills ─────────────────────────────────────────────────────────────────
 skills:
+  # Directory containing .skill.md files.
   directory: "./skills"
-  community_registry_url: ""    # future: community skill registry
+
+  # Future: URL for the community skill registry.
+  community_registry_url: null
+
+  # Skills enabled for the SkillLoader. Loaded progressively based on JD.
   enabled:
     - fullstack
     - ml-pipeline
@@ -103,3 +208,18 @@ skills:
     - blockchain
     - embedded-iot
     - llm-finetune
+
+# ── Content Factory ────────────────────────────────────────────────────────
+content:
+  # Formats to generate after a successful project publish.
+  formats:
+    - youtube_script    # Full narrated video script
+    - blog_post         # 2000-3000 word technical blog post
+    - linkedin_carousel # 10-slide carousel post
+    - twitter_thread    # 10-tweet thread
+
+  # Target blog post word count.
+  blog_word_count: [2000, 3000]
+
+  # Output directory for generated content files.
+  output_dir: "./data/content"
