@@ -10,7 +10,7 @@ Tables:
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -374,7 +374,7 @@ class MemoryStorage:
 
     async def delete_expired(self) -> int:
         """Delete all records whose expires_at is in the past. Returns count deleted."""
-        now_iso = datetime.utcnow().isoformat()
+        now_iso = datetime.now(UTC).isoformat()
         db = self._db()
         async with db.execute(
             "DELETE FROM memory_records WHERE expires_at IS NOT NULL AND expires_at < ?",
