@@ -59,6 +59,21 @@ letsbuild run --url "https://example.com/job-posting"
 - **Realistic Git History** — Conventional commits spread across days, not a single mega-commit
 - **Architecture Decision Records** — Every project includes ADRs demonstrating senior-level thinking
 
+## AgentForge Arena
+
+Competitive tournament platform where AI agent teams compete to build the best applications.
+
+- **Duel Mode** — Two teams, one challenge, head-to-head
+- **5 Agents Per Team** — Architect, Builder, Frontend, Tester, Critic
+- **ELO Leaderboard** — Bradley-Terry ratings track which configs win
+- **Spectator Mode** — Watch agents compete in real-time via WebSocket
+- **Challenge Library** — Growing collection of hackathon challenges
+
+```bash
+# Run a duel
+letsbuild arena duel url-shortener --team-a-model claude-opus-4-6 --team-b-model claude-sonnet-4-6
+```
+
 ## For Claude Code Users
 
 This repo ships with a complete `.claude/` configuration:

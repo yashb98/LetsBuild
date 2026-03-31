@@ -20,6 +20,7 @@ LetsBuild is an open-source 10-layer agentic pipeline that ingests job descripti
 | L7 | Content Factory | `letsbuild/content/` |
 | L8 | Memory + ReasoningBank | `letsbuild/memory/` |
 | L9 | Agent Hooks + Enforcement | `letsbuild/hooks/` |
+| Arena | AgentForge Arena | `letsbuild/arena/` |
 
 Cross-cutting: `letsbuild/gateway/` (MCP + messaging), `letsbuild/models/` (Pydantic schemas), `letsbuild/pipeline/` (orchestrator), `skills/` (project templates)
 
@@ -28,6 +29,7 @@ Cross-cutting: `letsbuild/gateway/` (MCP + messaging), `letsbuild/models/` (Pyda
 - **Language:** Python 3.12, strict typing with `mypy --strict`
 - **Framework:** Typer (CLI), FastAPI (API + MCP), Next.js 15 (web dashboard)
 - **AI:** Anthropic SDK (`anthropic` package), tool_use for all structured output
+- **Arena:** scipy (ELO), Redis (streaming), WebSocket (spectator)
 - **Async:** `asyncio` + `httpx` for all I/O-bound operations
 - **Validation:** Pydantic v2 for every data boundary
 - **Storage:** SQLite + HNSW (hnswlib) for ReasoningBank, Redis for pipeline state
@@ -60,6 +62,12 @@ python -m letsbuild.cli run --file <jd_path>
 
 # Docker sandbox build
 docker build -t letsbuild/sandbox:latest -f sandbox/Dockerfile .
+
+# Run arena duel
+python -m letsbuild.cli arena duel url-shortener
+
+# Run arena tests
+pytest tests/arena/ -v
 ```
 
 ## Critical Coding Patterns
