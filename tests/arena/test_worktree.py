@@ -51,9 +51,11 @@ class TestCreateTeamWorktree:
     ) -> None:
         process = _make_process_mock(returncode=128, stderr=b"fatal: branch already exists")
 
-        with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=process)):
-            with pytest.raises(RuntimeError, match="Failed to create worktree for team team-1"):
-                await worktree_manager.create_team_worktree("team-1", "/tmp/arena")
+        with (
+            patch("asyncio.create_subprocess_exec", AsyncMock(return_value=process)),
+            pytest.raises(RuntimeError, match="Failed to create worktree for team team-1"),
+        ):
+            await worktree_manager.create_team_worktree("team-1", "/tmp/arena")
 
 
 class TestCleanupWorktrees:
@@ -66,7 +68,7 @@ class TestCleanupWorktrees:
         with patch("asyncio.create_subprocess_exec", AsyncMock(return_value=process)) as mock_exec:
             await worktree_manager.cleanup_worktrees(["team-1", "team-2"], "/tmp/arena")
 
-        # 2 teams × 2 commands (worktree remove + branch delete) = 4 calls
+        # 2 teams x 2 commands (worktree remove + branch delete) = 4 calls
         assert mock_exec.call_count == 4
 
     @pytest.mark.asyncio()
