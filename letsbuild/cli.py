@@ -21,6 +21,10 @@ memory_app = typer.Typer(
 )
 app.add_typer(memory_app, name="memory")
 
+from letsbuild.arena.cli import arena_app  # noqa: E402
+
+app.add_typer(arena_app, name="arena")
+
 
 def _version_callback(value: bool) -> None:
     """Print version and exit."""

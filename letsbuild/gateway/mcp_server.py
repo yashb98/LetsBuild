@@ -187,6 +187,14 @@ app = FastAPI(
 )
 
 # ---------------------------------------------------------------------------
+# Arena WebSocket endpoint
+# ---------------------------------------------------------------------------
+
+from letsbuild.gateway.arena_ws import arena_websocket_endpoint  # noqa: E402
+
+app.websocket("/arena/ws/{tournament_id}")(arena_websocket_endpoint)
+
+# ---------------------------------------------------------------------------
 # Stub tool handlers
 # ---------------------------------------------------------------------------
 
